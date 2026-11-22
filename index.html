@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الخزنة</title>
+<style>
+:root{--gold:#f5c451;--bg:#0b1220;--panel:#0e1522;--line:#5b6b86;--red:#ff4d4d;--green:#3ddc84}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(circle at 50% 0%,#1a2742 0%,var(--bg) 60%);color:#fff;font-family:"Segoe UI",Tahoma,"Noto Sans Arabic","Geeza Pro",system-ui,sans-serif;min-height:100vh;min-height:100dvh;display:flex;justify-content:center;padding:max(16px,env(safe-area-inset-top)) 14px max(24px,env(safe-area-inset-bottom))}
+main{width:100%;max-width:460px;display:flex;flex-direction:column;align-items:center;gap:16px}
+h1{margin:6px 0 0;font-size:clamp(28px,8vw,38px);letter-spacing:1px}
+.clue{width:100%;text-align:center;background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.4);border-radius:14px;padding:12px 14px}
+.clue small{display:block;color:#c9b277;font-size:13px;margin-bottom:4px}
+.clue b{font-size:clamp(17px,4.8vw,21px);color:var(--gold);font-weight:600}
+.safe-wrap{width:100%;perspective:1400px}
+.safe{position:relative;direction:ltr;width:100%;border-radius:22px;border:6px solid #566176;background:#1b2434;box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.interior{position:absolute;inset:0;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;direction:rtl;background:radial-gradient(circle,#ffe9a8 0%,#d99a1f 55%,#7a4d05 100%);color:#3a2400;padding:16px}
+.interior .trophy{font-size:64px;line-height:1}
+.interior h2{margin:0;font-size:clamp(24px,7vw,32px)}
+.interior p{margin:0;font-size:15px}
+.door{position:relative;transform-origin:left center;transition:transform 1.5s cubic-bezier(.5,.1,.2,1);backface-visibility:hidden;background:linear-gradient(145deg,#4a566d,#2b3447);border-radius:14px;padding:20px 16px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;direction:rtl;z-index:2;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
+.safe.open .door{transform:rotateY(-105deg)}
+.led{position:absolute;top:14px;right:16px;width:14px;height:14px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);transition:.3s}
+.safe.open .led{background:var(--green);box-shadow:0 0 12px var(--green)}
+.safe.wrong .led{animation:blink .25s 3}
+@keyframes blink{50%{opacity:.15}}
+.panel{width:100%;background:var(--panel);border:2px solid #3a465e;border-radius:14px;padding:16px 10px;text-align:center}
+.panel h3{margin:0 0 12px;font-size:19px;font-weight:600}
+.otp{direction:ltr;display:flex;justify-content:center;gap:clamp(6px,2vw,10px)}
+.otp input{width:clamp(48px,16vw,64px);height:clamp(58px,18vw,74px);text-align:center;font-size:clamp(26px,8vw,34px);font-weight:600;color:#fff;background:#111b2d;border:2px solid var(--line);border-radius:12px;outline:none;caret-color:var(--gold);transition:border-color .15s,box-shadow .15s;padding:0}
+.otp input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,196,81,.25)}
+.otp input.letter{border-style:dashed;margin-left:clamp(4px,1.5vw,8px)}
+.otp input:disabled{opacity:.5}
+.hint{margin:12px 2px 0;color:#9fb0cc;font-size:13.5px;line-height:1.7}
+.msg{min-height:22px;font-size:14.5px;color:#ffb3b3;text-align:center}
+.handle{position:relative;display:block;padding:0;width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8996ad,#3b465c);border:4px solid #202938;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 6px 14px rgba(0,0,0,.45)}
+.handle:active{cursor:grabbing}
+.handle:disabled{opacity:.6;cursor:not-allowed}
+.handle:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+.tap{font-size:13.5px;color:#c4cfe3}
+.handle::before,.handle::after,.handle i{content:"";position:absolute;left:50%;top:50%;width:76px;height:8px;margin:-4px 0 0 -38px;border-radius:4px;background:#c7d0e0}
+.handle::after{transform:rotate(60deg)}
+.handle i{transform:rotate(120deg)}
+.handle b{position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--gold)}
+.shake{animation:shake .5s}
+@keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+.locked{text-align:center}
+.locked .big{font-size:46px;line-height:1}
+.locked h3{margin:6px 0}
+.pwshow{direction:ltr;display:flex;justify-content:center;gap:8px;margin:10px 0}
+.pwshow span{width:52px;height:62px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;background:#111b2d;border:2px solid var(--gold);color:var(--gold);border-radius:12px}
+.pwshow span:last-child{border-style:dashed;margin-left:6px}
+.interior .pwshow span{background:#fff8de;border-color:#7a4d05;color:#3a2400}
+.small{font-size:13.5px;color:#9fb0cc}
+.hidden{display:none!important}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+</style>
+</head>
+<body>
+<main>
+  <h1>🔐 الخزنة</h1>
+
+  <div class="clue">
+    <small>التلميح الأخير</small>
+    <b>اول حرف من اسم فريقك + الرقم</b>
+  </div>
+
+  <div class="safe-wrap">
+    <div class="safe" id="safe">
+      <div class="interior" id="interior">
+        <div class="trophy">🏆</div>
+        <h2>فتحت الخزنة!</h2>
+        <p>مبروك، كلمة المرور الصحيحة</p>
+        <div class="pwshow" id="winPw"></div>
+      </div>
+
+      <div class="door" id="door">
+        <div class="led" id="led"></div>
+        <div class="panel" id="panel">
+          <div id="entry">
+            <h3>أدخل كلمة المرور</h3>
+            <div class="otp" id="otp">
+              <input inputmode="numeric" maxlength="1" autocomplete="off" aria-label="الرقم الأول">
+              <input inputmode="numeric" maxlength="1" autocomplete="off" aria-label="الرقم الثاني">
+              <input inputmode="numeric" maxlength="1" autocomplete="off" aria-label="الرقم الثالث">
+              <input class="letter" inputmode="text" lang="ar" maxlength="2" autocomplete="off" autocapitalize="off" aria-label="الحرف">
+            </div>
+            <p class="hint">أول ٣ خانات من اليسار أرقام، والخانة الرابعة في أقصى اليمين حرف.</p>
+          </div>
+          <div class="locked hidden" id="lockedBox">
+            <div class="big">🔒</div>
+            <h3>انتهت المسابقة</h3>
+            <div class="small">تم فتح الخزنة بالفعل. كلمة المرور الفائزة:</div>
+            <div class="pwshow" id="lockPw"></div>
+            <div class="small" id="lockTime"></div>
+          </div>
+        </div>
+        <div class="msg" id="msg" aria-live="polite"></div>
+        <div class="tap" id="tap">اضغط على المقبض لفتح الخزنة</div>
+        <button class="handle" id="handle" type="button" aria-label="فتح الخزنة"><i></i><b></b></button>
+      </div>
+    </div>
+  </div>
+</main>
+<canvas id="fx"></canvas>
+
+<script>
+/* ============ الإعدادات ============ */
+// للعب من أجهزة مختلفة: ضع رابط Firebase Realtime Database هنا، مثال:
+// "https://your-project-default-rtdb.firebaseio.com"
+// اتركه فارغاً للتجربة على جهاز واحد فقط.
+var FIREBASE_URL = "https://crack-the-code-6a738-default-rtdb.firebaseio.com/";
+var COOLDOWN_MS = 3000;   // مدة الانتظار بعد كلمة مرور خاطئة
+var POLL_MS = 2000;       // كل كم ميلي ثانية يفحص الموقع إن كان أحد فاز
+
+/* ============ كلمات المرور (مخزنة كبصمة SHA-256 وليس كنص) ============ */
+var SALT = "ctc-safe-v1|";
+var VALID = {
+  "50d2f3d12a4c3ba2c9a1f333b9edd24a2780a81ede23d51a4ff5be36e842a8cf":1,
+  "2d8892f6bf41ca8260e8fad7824fd4e267e6ccf3694ca7113ab3e1709dace21f":1,
+  "794335d93325c51a513044e4b4fa19011b5d3adeef68d46f0f06eed411d206c6":1,
+  "14b345313f99c2f0e2a189ee4fdccf1816cc99a6950de0ef54fd858bdd2a3837":1,
+  "98ec29918ba4d1e33f412cd39796f19342f03d194b663e59842c32d2c79f38ea":1,
+  "882612380a18f1bc56a6aa80daa36a17f27b3969ea9904ab11b604f86ee9fbd7":1
+};
+
+function sha256(s){
+  s = unescape(encodeURIComponent(s));
+  function rr(v,a){return (v>>>a)|(v<<(32-a));}
+  var mp=Math.pow, mw=mp(2,32), i, j, result="", words=[], asl=s.length*8, hash=[], k=[], pc=0, ic={};
+  for(var c=2;pc<64;c++){
+    if(!ic[c]){
+      for(i=0;i<313;i+=c) ic[i]=c;
+      hash[pc]=(mp(c,.5)*mw)|0;
+      k[pc++]=(mp(c,1/3)*mw)|0;
+    }
+  }
+  s+="\x80";
+  while(s.length%64-56) s+="\x00";
+  for(i=0;i<s.length;i++){ j=s.charCodeAt(i); words[i>>2]|=j<<((3-i)%4)*8; }
+  words[words.length]=((asl/mw)|0);
+  words[words.length]=asl;
+  for(j=0;j<words.length;){
+    var w=words.slice(j,j+=16), old=hash;
+    hash=hash.slice(0,8);
+    for(i=0;i<64;i++){
+      var w15=w[i-15], w2=w[i-2], a=hash[0], e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash);
+      hash[4]=(hash[4]+t1)|0;
+    }
+    for(i=0;i<8;i++) hash[i]=(hash[i]+old[i])|0;
+  }
+  for(i=0;i<8;i++) for(j=3;j+1;j--){ var b=(hash[i]>>(j*8))&255; result+=((b<16)?0:"")+b.toString(16); }
+  return result;
+}
+
+/* ============ تطبيع المدخلات ============ */
+var AR="٠١٢٣٤٥٦٧٨٩", FA="۰۱۲۳۴۵۶۷۸۹";
+function toDigit(ch){
+  var i=AR.indexOf(ch); if(i<0) i=FA.indexOf(ch);
+  if(i>=0) return String(i);
+  return /[0-9]/.test(ch)?ch:"";
+}
+function isLetter(ch){
+  if(/^[A-Za-z]$/.test(ch)) return true;
+  return ch!=="\u0640" && /[\u0600-\u06FF]/.test(ch) && /\p{L}/u.test(ch);
+}
+function toLetter(str){
+  for(var i=str.length-1;i>=0;i--){ if(isLetter(str[i])) return str[i]; }
+  return "";
+}
+
+/* ============ عناصر الصفحة ============ */
+var $=function(id){return document.getElementById(id);};
+var safe=$("safe"), msg=$("msg"), handle=$("handle"), entry=$("entry"), lockedBox=$("lockedBox");
+var boxes=[].slice.call(document.querySelectorAll("#otp input"));
+var winner=null, busy=false, cooling=false;
+
+var clientId=(function(){
+  try{
+    var v=localStorage.getItem("ctc_cid");
+    if(!v){ v=Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem("ctc_cid",v); }
+    return v;
+  }catch(e){ return Math.random().toString(36).slice(2); }
+})();
+
+/* ============ حقول الإدخال (OTP) ============ */
+function setMsg(t,ok){ msg.textContent=t||""; msg.style.color=ok?"#9be7b3":"#ffb3b3"; }
+
+boxes.forEach(function(b,i){
+  b.addEventListener("input",function(){
+    if(i<3){
+      var d=""; for(var n=0;n<b.value.length;n++){ d=toDigit(b.value[n])||d; }
+      b.value=d;
+      if(d){ setMsg(""); boxes[i+1].focus(); if(i+1===3) boxes[3].select(); }
+    }else{
+      var l=toLetter(b.value);
+      setMsg("");
+      b.value=l;
+    }
+  });
+  b.addEventListener("keydown",function(e){
+    if(e.key==="Enter"){ e.preventDefault(); submit(); return; }
+    if(e.key==="Backspace" && !b.value && i>0){ boxes[i-1].focus(); boxes[i-1].value=""; e.preventDefault(); }
+    if(e.key==="ArrowLeft" && i>0){ boxes[i-1].focus(); e.preventDefault(); }
+    if(e.key==="ArrowRight" && i<3){ boxes[i+1].focus(); e.preventDefault(); }
+  });
+  b.addEventListener("focus",function(){ try{b.select();}catch(e){} });
+  b.addEventListener("paste",function(e){
+    var t=(e.clipboardData||window.clipboardData).getData("text")||"";
+    e.preventDefault();
+    var ds=[], l="";
+    for(var n=0;n<t.length;n++){
+      var d=toDigit(t[n]);
+      if(d && ds.length<3) ds.push(d);
+      else if(!l && isLetter(t[n])) l=t[n];
+    }
+    for(var m=0;m<3;m++) boxes[m].value=ds[m]||"";
+    boxes[3].value=l;
+    (ds.length<3?boxes[ds.length]:boxes[3]).focus();
+  });
+});
+var angle=0, drag=null, justDragged=false;
+function setAngle(a,ms){
+  angle=a;
+  handle.style.transition=ms?("transform "+ms+"ms cubic-bezier(.3,1.3,.5,1)"):"none";
+  handle.style.transform="rotate("+a+"deg)";
+}
+function pAngle(e){
+  var r=handle.getBoundingClientRect();
+  return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*180/Math.PI;
+}
+handle.addEventListener("pointerdown",function(e){
+  if(handle.disabled||winner) return;
+  drag={last:pAngle(e),x:e.clientX,y:e.clientY,moved:false};
+  try{handle.setPointerCapture(e.pointerId);}catch(_){}
+});
+handle.addEventListener("pointermove",function(e){
+  if(!drag) return;
+  if(!drag.moved && Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){ drag.moved=true; drag.last=pAngle(e); return; }
+  if(!drag.moved) return;
+  var cur=pAngle(e), dd=cur-drag.last;
+  if(dd>180) dd-=360; if(dd<-180) dd+=360;
+  drag.last=cur; setAngle(angle+dd,0);
+});
+function endDrag(){ if(drag && drag.moved) justDragged=true; drag=null; }
+handle.addEventListener("pointerup",endDrag);
+handle.addEventListener("pointercancel",endDrag);
+handle.addEventListener("click",function(){
+  if(justDragged){ justDragged=false; return; }
+  if(handle.disabled||winner) return;
+  setAngle(angle+120,500);
+  submit();
+});
+
+function readPassword(){
+  var p="";
+  for(var i=0;i<3;i++){ if(!boxes[i].value) return null; p+=boxes[i].value; }
+  if(!boxes[3].value) return null;
+  return p+boxes[3].value;
+}
+function clearBoxes(){ boxes.forEach(function(b){b.value="";}); }
+function setEnabled(on){ boxes.forEach(function(b){b.disabled=!on;}); handle.disabled=!on; }
+
+/* ============ التخزين المشترك (Firebase أو جهاز واحد) ============ */
+function localGet(){ try{ return JSON.parse(localStorage.getItem("ctc_winner")||"null"); }catch(e){ return null; } }
+function getWinner(){
+  if(FIREBASE_URL){
+    return fetch(FIREBASE_URL.replace(/\/$/,"")+"/winner.json",{cache:"no-store"}).then(function(r){
+      if(!r.ok) throw new Error("http "+r.status);
+      return r.json();
+    });
+  }
+  return Promise.resolve(localGet());
+}
+function claim(rec){
+  if(FIREBASE_URL){
+    var url=FIREBASE_URL.replace(/\/$/,"")+"/winner.json";
+    return fetch(url,{method:"PUT",body:JSON.stringify(rec)}).catch(function(){}).then(getWinner).then(function(w){
+      return !!(w && w.id===rec.id);
+    });
+  }
+  var cur=localGet();
+  if(cur) return Promise.resolve(cur.id===rec.id);
+  try{ localStorage.setItem("ctc_winner",JSON.stringify(rec)); }catch(e){}
+  return Promise.resolve(true);
+}
+if(!FIREBASE_URL && /[?&]reset/.test(location.search)){ try{localStorage.removeItem("ctc_winner");}catch(e){} }
+
+/* ============ المنطق الرئيسي ============ */
+function renderPw(el,pw){
+  el.innerHTML="";
+  for(var i=0;i<pw.length;i++){ var s=document.createElement("span"); s.textContent=pw[i]; el.appendChild(s); }
+}
+function fmtTime(t){
+  try{ return new Date(t).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit",second:"2-digit"}); }catch(e){ return ""; }
+}
+
+function wrong(){
+  safe.classList.remove("wrong"); void safe.offsetWidth; safe.classList.add("wrong");
+  var d=$("door"); d.classList.remove("shake"); void d.offsetWidth; d.classList.add("shake");
+  clearBoxes(); cooling=true; setEnabled(false);
+  var left=Math.ceil(COOLDOWN_MS/1000);
+  (function tick(){
+    if(winner) return;
+    if(left<=0){ cooling=false; setMsg(""); setEnabled(true); boxes[0].focus(); return; }
+    setMsg("كلمة المرور خاطئة. حاول بعد "+left+" ثوانٍ");
+    left--; setTimeout(tick,1000);
+  })();
+}
+
+function showLocked(w){
+  winner=w; cooling=false;
+  entry.classList.add("hidden"); lockedBox.classList.remove("hidden");
+  renderPw($("lockPw"),w.pw);
+  $("lockTime").textContent=w.t?("وقت الفتح: "+fmtTime(w.t)):"";
+  handle.disabled=true; $("tap").classList.add("hidden"); setMsg("");
+  boxes.forEach(function(b){b.blur();});
+}
+function celebrate(w){
+  winner=w;
+  entry.style.visibility="hidden"; $("tap").style.visibility="hidden"; setMsg("");
+  renderPw($("winPw"),w.pw);
+  safe.classList.add("open");
+  setAngle(angle+540,1300);
+  setTimeout(confetti,700);
+  var m=$("door"); m.style.pointerEvents="none";
+}
+function applyWinner(w){ if(w.id===clientId) celebrate(w); else showLocked(w); }
+
+function submit(){
+  if(busy||cooling||winner) return;
+  var pw=readPassword();
+  if(!pw){ setMsg("أكمل الخانات الأربع أولاً"); return; }
+  if(!VALID[sha256(SALT+pw)]){ wrong(); return; }
+  busy=true; setEnabled(false); setMsg("جارٍ الفتح…",true);
+  getWinner().then(function(w){
+    if(w){ applyWinner(w); return; }
+    var rec={pw:pw,t:Date.now(),id:clientId};
+    return claim(rec).then(function(won){
+      if(won) celebrate(rec);
+      else return getWinner().then(function(w2){ if(w2) applyWinner(w2); });
+    });
+  }).catch(function(){
+    setMsg("تعذر الاتصال بالإنترنت. حاول مرة أخرى."); setEnabled(true);
+  }).then(function(){ busy=false; });
+}
+
+function poll(){
+  if(winner) return;
+  getWinner().then(function(w){ if(w && !winner) applyWinner(w); }).catch(function(){});
+}
+setInterval(poll,POLL_MS);
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) poll(); });
+poll();
+boxes[0].focus();
+
+/* ============ الاحتفال (قصاصات ملونة) ============ */
+function confetti(){
+  var cv=$("fx"), cx=cv.getContext("2d"), W, H, ps=[], colors=["#f5c451","#3ddc84","#4da3ff","#ff6b9a","#ffffff","#b388ff"];
+  function size(){ W=cv.width=innerWidth*devicePixelRatio; H=cv.height=innerHeight*devicePixelRatio; }
+  size();
+  for(var i=0;i<220;i++){
+    ps.push({x:Math.random()*W,y:-Math.random()*H*0.6,r:(5+Math.random()*7)*devicePixelRatio,
+      c:colors[i%colors.length],vx:(Math.random()-.5)*4*devicePixelRatio,vy:(2+Math.random()*5)*devicePixelRatio,
+      a:Math.random()*6,va:(Math.random()-.5)*.3});
+  }
+  var t0=performance.now();
+  (function frame(t){
+    cx.clearRect(0,0,W,H);
+    ps.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy; p.a+=p.va; p.vy+=0.04*devicePixelRatio;
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle=p.c; cx.fillRect(-p.r/2,-p.r/3,p.r,p.r*0.6); cx.restore();
+    });
+    if(t-t0<6500) requestAnimationFrame(frame); else cx.clearRect(0,0,W,H);
+  })(t0);
+}
+</script>
+</body>
+</html>
